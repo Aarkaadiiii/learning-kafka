@@ -1,0 +1,62 @@
+services:
+  kafka-server1:
+    image: apache/kafka:latest
+    networks:
+      - kafka-net
+    volumes:
+      - kafka-vol1:/var/lib/kafka/data
+    ports:
+      - '9092:9092'
+    environment:
+      CLUSTER_ID: 'iRZLf_1gRSCElKZ7bbX64A'
+      KAFKA_NODE_ID: '1'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka-server1:9092,CONTROLLER://kafka-server1:9093'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka-server1:9092'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-server1:9093,2@kafka-server2:9093,3@kafka-server3:9093'
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+
+  kafka-server2:
+    image: apache/kafka:latest
+    networks:
+      - kafka-net
+    volumes:
+      - kafka-vol2:/var/lib/kafka/data
+    ports:
+      - '9093:9092'
+    environment:
+      CLUSTER_ID: 'iRZLf_1gRSCElKZ7bbX64A'
+      KAFKA_NODE_ID: '2'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka-server2:9092,CONTROLLER://kafka-server2:9093'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka-server2:9092'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-server1:9093,2@kafka-server2:9093,3@kafka-server3:9093'
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+
+  kafka-server3:
+    image: apache/kafka:latest
+    networks:
+      - kafka-net
+    volumes:
+      - kafka-vol3:/var/lib/kafka/data
+    ports:
+      - '9094:9092'
+    environment:
+      CLUSTER_ID: 'iRZLf_1gRSCElKZ7bbX64A'
+      KAFKA_NODE_ID: '3'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka-server3:9092,CONTROLLER://kafka-server3:9093'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka-server3:9092'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-server1:9093,2@kafka-server2:9093,3@kafka-server3:9093'
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
+
+volumes:
+  kafka-vol1:
+  kafka-vol2:
+  kafka-vol3:
+
+networks:
+  kafka-net:
