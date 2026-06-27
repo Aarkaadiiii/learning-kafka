@@ -1,4 +1,4 @@
-package minchakov.arkadii.producteventsproducer.event;
+package minchakov.arkadii.common.event;
 
 import java.math.BigDecimal;
 

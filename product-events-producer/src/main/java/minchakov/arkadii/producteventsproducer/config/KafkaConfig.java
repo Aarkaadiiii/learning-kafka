@@ -1,6 +1,6 @@
 package minchakov.arkadii.producteventsproducer.config;
 
-import minchakov.arkadii.producteventsproducer.event.ProductCreatedEvent;
+import minchakov.arkadii.common.event.ProductCreatedEvent;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
