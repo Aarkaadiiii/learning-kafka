@@ -3,6 +3,7 @@ package minchakov.arkadii.producteventsproducer.config;
 import minchakov.arkadii.common.event.ProductCreatedEvent;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,8 +38,8 @@ public class KafkaConfig {
     public Map<String, Object> productCreatedEventsProducerConfig() {
         var config = new HashMap<String, Object>();
         config.put(ProducerConfig.ACKS_CONFIG, productCreatedEventsProps.acks());
-        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, productCreatedEventsProps.keySerializer());
-        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, productCreatedEventsProps.valueSerializer());
+        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JacksonJsonSerializer.class);
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, productCreatedEventsProps.bootstrapServers());
         config.put(ProducerConfig.LINGER_MS_CONFIG, productCreatedEventsProps.lingerMs());
         config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, productCreatedEventsProps.idempotence());
@@ -54,7 +56,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate() {
+    public KafkaTemplate<String, ProductCreatedEvent> productCreatedEventsKafkaTemplate() {
         return new KafkaTemplate<>(productCreatedEventsProducerFactory());
     }
 }
