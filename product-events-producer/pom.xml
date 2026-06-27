@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>minchakov.arkadii</groupId>
-    <artifactId>first-microservice</artifactId>
+    <artifactId>product-events-producer</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>first-microservice</name>
-    <description>first-microservice</description>
+    <name>product-events-producer</name>
+    <description>product-events-producer</description>
     <url/>
     <licenses>
         <license/>

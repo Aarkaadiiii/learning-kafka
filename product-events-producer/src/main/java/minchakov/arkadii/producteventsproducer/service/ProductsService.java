@@ -1,7 +1,7 @@
-package minchakov.arkadii.firstmicroservice.service;
+package minchakov.arkadii.producteventsproducer.service;
 
-import minchakov.arkadii.firstmicroservice.dto.ProductCreatedDto;
-import minchakov.arkadii.firstmicroservice.event.ProductCreatedEvent;
+import minchakov.arkadii.producteventsproducer.dto.ProductCreatedDto;
+import minchakov.arkadii.producteventsproducer.event.ProductCreatedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;

@@ -1,4 +1,4 @@
-package minchakov.arkadii.firstmicroservice.dto;
+package minchakov.arkadii.producteventsproducer.dto;
 
 import java.math.BigDecimal;
 

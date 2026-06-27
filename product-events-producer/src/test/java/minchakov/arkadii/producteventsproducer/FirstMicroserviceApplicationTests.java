@@ -1,4 +1,4 @@
-package minchakov.arkadii.firstmicroservice;
+package minchakov.arkadii.producteventsproducer;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

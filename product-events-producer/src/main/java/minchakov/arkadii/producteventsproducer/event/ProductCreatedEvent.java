@@ -1,4 +1,4 @@
-package minchakov.arkadii.firstmicroservice.event;
+package minchakov.arkadii.producteventsproducer.event;
 
 import java.math.BigDecimal;
 

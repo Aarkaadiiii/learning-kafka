@@ -1,7 +1,7 @@
-package minchakov.arkadii.firstmicroservice.controller;
+package minchakov.arkadii.producteventsproducer.controller;
 
-import minchakov.arkadii.firstmicroservice.dto.ProductCreatedDto;
-import minchakov.arkadii.firstmicroservice.service.ProductsService;
+import minchakov.arkadii.producteventsproducer.dto.ProductCreatedDto;
+import minchakov.arkadii.producteventsproducer.service.ProductsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

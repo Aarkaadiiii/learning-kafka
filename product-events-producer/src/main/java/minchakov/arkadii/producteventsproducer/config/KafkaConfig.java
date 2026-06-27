@@ -1,6 +1,6 @@
-package minchakov.arkadii.firstmicroservice.config;
+package minchakov.arkadii.producteventsproducer.config;
 
-import minchakov.arkadii.firstmicroservice.event.ProductCreatedEvent;
+import minchakov.arkadii.producteventsproducer.event.ProductCreatedEvent;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -26,11 +26,10 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic productCreatedEventsTopic() {
-        return TopicBuilder.name("product-created-events-topic")
-            .partitions(3)
-            .replicas(3)
-            .config("min.insync.replicas", "2")
-            .build();
+        return TopicBuilder.name("product-created-events-topic").partitions(3).replicas(3).config(
+            "min.insync.replicas",
+            "2"
+        ).build();
     }
 
     @Bean
@@ -41,6 +40,11 @@ public class KafkaConfig {
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, productCreatedEventsProps.valueSerializer());
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, productCreatedEventsProps.bootstrapServers());
         config.put(ProducerConfig.LINGER_MS_CONFIG, productCreatedEventsProps.lingerMs());
+        config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, productCreatedEventsProps.idempotence());
+        config.put(
+            ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION,
+            productCreatedEventsProps.maxInFlightRequestsPerConnection()
+        );
         return config;
     }
 
