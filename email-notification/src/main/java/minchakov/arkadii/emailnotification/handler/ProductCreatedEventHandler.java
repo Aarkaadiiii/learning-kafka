@@ -40,7 +40,7 @@ public class ProductCreatedEventHandler {
         log.info("Received event: {}", productCreatedEvent);
 
         try {
-            var response = restTemplate.exchange("http://localhost:8090/internalServerError", HttpMethod.GET, null, String.class);
+            var response = restTemplate.exchange("http://localhost:8090/ok", HttpMethod.GET, null, String.class);
             if (response.getStatusCode().is2xxSuccessful()) {
                 log.info("Get successful response from mock service: {}", response.getBody());
             } else {
