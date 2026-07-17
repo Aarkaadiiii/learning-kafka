@@ -1,8 +1,10 @@
 package minchakov.arkadii.producteventsproducer.config;
 
+import minchakov.arkadii.common.config.KafkaProducerConfigurationProperties;
 import minchakov.arkadii.common.event.ProductCreatedEvent;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.config.TopicConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -28,10 +30,15 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic productCreatedEventsTopic() {
-        return TopicBuilder.name("product-created-events-topic").partitions(3).replicas(3).config(
-            "min.insync.replicas",
-            "2"
-        ).build();
+        return TopicBuilder
+            .name(productCreatedEventsProps.topic().name())
+            .partitions(productCreatedEventsProps.topic().partitions())
+            .replicas(productCreatedEventsProps.topic().replicas())
+            .config(
+                TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG,
+                String.valueOf(productCreatedEventsProps.topic().minInsyncReplicas())
+            )
+            .build();
     }
 
     @Bean

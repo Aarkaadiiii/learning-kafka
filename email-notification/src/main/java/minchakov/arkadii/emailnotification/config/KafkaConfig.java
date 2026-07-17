@@ -1,15 +1,23 @@
 package minchakov.arkadii.emailnotification.config;
 
+import minchakov.arkadii.common.config.KafkaConsumerConfigurationProperties;
+import minchakov.arkadii.common.config.KafkaProducerConfigurationProperties;
+import minchakov.arkadii.common.config.MockServiceClientConfiguration;
+import minchakov.arkadii.common.event.NotificationSentEvent;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.config.TopicConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.annotation.EnableKafkaRetryTopic;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -18,6 +26,7 @@ import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
+import org.springframework.kafka.transaction.KafkaTransactionManager;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
@@ -25,14 +34,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@EnableConfigurationProperties(KafkaConsumerConfigurationProperties.class)
+@EnableConfigurationProperties({
+    KafkaConsumerConfigurationProperties.class,
+    KafkaProducerConfigurationProperties.class
+})
 @EnableKafkaRetryTopic
+@Import(MockServiceClientConfiguration.class)
 public class KafkaConfig {
 
     private final KafkaConsumerConfigurationProperties productCreatedEventsProps;
 
-    public KafkaConfig(KafkaConsumerConfigurationProperties productCreatedEventsProps) {
+    private final KafkaProducerConfigurationProperties notificationSentEventsProps;
+
+    public KafkaConfig(
+        KafkaConsumerConfigurationProperties productCreatedEventsProps,
+        KafkaProducerConfigurationProperties notificationSentEventsProps
+    ) {
         this.productCreatedEventsProps = productCreatedEventsProps;
+        this.notificationSentEventsProps = notificationSentEventsProps;
     }
 
     @Bean
@@ -86,5 +105,44 @@ public class KafkaConfig {
         scheduler.setThreadNamePrefix("kafka-dlt-");
         scheduler.initialize();
         return scheduler;
+    }
+
+    @Bean
+    public NewTopic notificationSentEventsTopic() {
+        return TopicBuilder.name(notificationSentEventsProps.topic().name())
+                           .partitions(notificationSentEventsProps.topic().partitions())
+                           .replicas(notificationSentEventsProps.topic().replicas())
+                           .config(
+                               TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG,
+                               String.valueOf(notificationSentEventsProps.topic().minInsyncReplicas())
+                           )
+                           .build();
+    }
+
+    @Bean
+    public Map<String, Object> notificationSentEventsProducerConfig() {
+        var config = new HashMap<String, Object>();
+        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, productCreatedEventsProps.bootstrapServers());
+        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JacksonJsonSerializer.class);
+        config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, notificationSentEventsProps.idempotence());
+        config.put(ProducerConfig.ACKS_CONFIG, notificationSentEventsProps.acks());
+        config.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, notificationSentEventsProps.transactionIdPrefix());
+        return config;
+    }
+
+    @Bean
+    public ProducerFactory<String, NotificationSentEvent> notificationSentEventProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(notificationSentEventsProducerConfig());
+    }
+
+    @Bean
+    public KafkaTemplate<String, NotificationSentEvent> notificationSentEventKafkaTemplate() {
+        return new KafkaTemplate<>(notificationSentEventProducerFactory());
+    }
+
+    @Bean
+    public KafkaTransactionManager<String, NotificationSentEvent> notificationSentEventKafkaTransactionManager() {
+        return new KafkaTransactionManager<>(notificationSentEventProducerFactory());
     }
 }

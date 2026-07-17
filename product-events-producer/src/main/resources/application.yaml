@@ -3,6 +3,11 @@ spring:
     name: product-events-producer
   kafka:
     producer:
+      topic:
+        name: product-created-events-topic
+        partitions: 3
+        replicas: 3
+        min-insync-replicas: 2
       bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
       acks: all
       linger-ms: 0

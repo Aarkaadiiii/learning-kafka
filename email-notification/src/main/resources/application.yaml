@@ -3,9 +3,21 @@ spring:
     name: email-notification
   kafka:
     consumer:
+      topic:
+        name: product-created-events-topic
       bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
       group-id: product-created-events
       trusted-packages: minchakov.arkadii.common.event
+    producer:
+      topic:
+        name: notification-sent-events-topic
+        partitions: 3
+        replicas: 3
+        min-insync-replicas: 2
+      bootstrap-servers: ${spring.kafka.consumer.bootstrap-servers}
+      idempotence: true
+      acks: all
+      transaction-id-prefix: email-notifications-${random.value}-
   datasource:
     url: jdbc:h2:mem:email-notification
     username: username
@@ -15,3 +27,6 @@ spring:
       enabled: true
 server:
   port: 0
+logging.level.org.springframework:
+  kafka.transaction: TRACE
+  transaction: TRACE
