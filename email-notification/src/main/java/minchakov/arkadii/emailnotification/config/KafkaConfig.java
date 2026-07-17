@@ -1,5 +1,6 @@
 package minchakov.arkadii.emailnotification.config;
 
+import jakarta.persistence.EntityManagerFactory;
 import minchakov.arkadii.common.config.KafkaConsumerConfigurationProperties;
 import minchakov.arkadii.common.config.KafkaProducerConfigurationProperties;
 import minchakov.arkadii.common.config.MockServiceClientConfiguration;
@@ -27,6 +28,7 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
 import org.springframework.kafka.transaction.KafkaTransactionManager;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
@@ -144,5 +146,10 @@ public class KafkaConfig {
     @Bean
     public KafkaTransactionManager<String, NotificationSentEvent> notificationSentEventKafkaTransactionManager() {
         return new KafkaTransactionManager<>(notificationSentEventProducerFactory());
+    }
+
+    @Bean
+    public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+        return new JpaTransactionManager(entityManagerFactory);
     }
 }

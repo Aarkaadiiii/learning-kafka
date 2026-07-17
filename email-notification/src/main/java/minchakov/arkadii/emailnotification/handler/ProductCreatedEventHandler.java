@@ -5,12 +5,12 @@ import minchakov.arkadii.common.event.NotificationSentEvent;
 import minchakov.arkadii.common.event.ProductCreatedEvent;
 import minchakov.arkadii.emailnotification.exception.NonRetryableException;
 import minchakov.arkadii.emailnotification.exception.RetryableException;
-//import minchakov.arkadii.emailnotification.repository.ProcessedEventRepository;
+import minchakov.arkadii.emailnotification.model.ProcessedEvent;
+import minchakov.arkadii.emailnotification.repository.ProcessedEventRepository;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import org.springframework.dao.DataIntegrityViolationException;
-//import org.springframework.http.HttpMethod;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -30,23 +30,23 @@ public class ProductCreatedEventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ProductCreatedEventHandler.class);
     private final MockServiceClient mockServiceClient;
-//    private final ProcessedEventRepository processedEventRepository;
+    private final ProcessedEventRepository processedEventRepository;
     private final KafkaTemplate<String, NotificationSentEvent> kafkaTemplate;
     private final NewTopic notificationSentEventsTopic;
 
     public ProductCreatedEventHandler(
         MockServiceClient mockServiceClient,
-//        ProcessedEventRepository processedEventRepository,
+        ProcessedEventRepository processedEventRepository,
         KafkaTemplate<String, NotificationSentEvent> kafkaTemplate,
         NewTopic notificationSentEventsTopic
     ) {
         this.mockServiceClient = mockServiceClient;
-//        this.processedEventRepository = processedEventRepository;
+        this.processedEventRepository = processedEventRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.notificationSentEventsTopic = notificationSentEventsTopic;
     }
 
-    @Transactional("notificationSentEventKafkaTransactionManager")
+    @Transactional("transactionManager")
     @KafkaListener(
         topics = "${spring.kafka.consumer.topic.name}",
         containerFactory = "productCreatedEventsContainerFactory"
@@ -58,16 +58,16 @@ public class ProductCreatedEventHandler {
         kafkaTemplate = "productCreatedEventsDLTKafkaTemplate"
     )
     public void handleTopic(
-        ProductCreatedEvent productCreatedEvent
-//        @Header("messageId") String messageId,
-//        @Header(KafkaHeaders.RECEIVED_KEY) String messageKey
+        ProductCreatedEvent productCreatedEvent,
+        @Header("messageId") String messageId,
+        @Header(KafkaHeaders.RECEIVED_KEY) String messageKey
     ) {
         log.info("Received event: {}", productCreatedEvent);
 
-//        if (processedEventRepository.existsById(messageId)) {
-//            log.info("Received duplicate message with id {} and key {}, updating offset", messageId, messageKey);
-//            return;
-//        }
+        if (processedEventRepository.existsById(messageId)) {
+            log.info("Received duplicate message with id {} and key {}, updating offset", messageId, messageKey);
+            return;
+        }
 
         try {
             var notificationSentEvent = new NotificationSentEvent(
@@ -101,13 +101,16 @@ public class ProductCreatedEventHandler {
             } else {
                 throw new RetryableException("Strange response from mock service: " + response.getBody());
             }
-//            processedEventRepository.save(new ProcessedEvent(messageId, productCreatedEvent.id()));
+
+            processedEventRepository.save(new ProcessedEvent(messageId, productCreatedEvent.id()));
+
+//            mockServiceClient.getInternalServerError();
         } catch (ResourceAccessException e) {
             throw new RetryableException("I/O error when requesting mock service", e);
         } catch (HttpServerErrorException e) {
             throw new NonRetryableException("Mock service error", e);
-//        } catch (DataIntegrityViolationException e) {
-//            throw new NonRetryableException("Exception while saving processed event", e);
+        } catch (DataIntegrityViolationException e) {
+            throw new NonRetryableException("Exception while saving processed event", e);
         } catch (Exception e) {
             throw new NonRetryableException("Unexpected exception", e);
         }
