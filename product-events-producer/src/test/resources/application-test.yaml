@@ -1,0 +1,11 @@
+spring:
+  kafka:
+    consumer:
+      topic:
+        name: product-created-events-topic
+      group-id: product-created-events-test
+      trusted-packages: minchakov.arkadii.common.event
+      auto-offset-reset: earliest
+    producer:
+      bootstrap-servers: ${spring.embedded.kafka.brokers}
+

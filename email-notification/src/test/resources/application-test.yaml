@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: email-notification
+  kafka:
+    consumer:
+      bootstrap-servers: ${spring.embedded.kafka.brokers}
+      group-id: product-created-events-test
+      trusted-packages: minchakov.arkadii.common.event
+      auto-offset-reset: earliest
+    producer:
+      topic:
+        name: notification-sent-events-topic
+        partitions: 3
+        replicas: 1
+        min-insync-replicas: 1
+      bootstrap-servers: ${spring.embedded.kafka.brokers}
